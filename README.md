@@ -1,1 +1,1 @@
-# carbon-prediction
+# Coal-price-prediction
