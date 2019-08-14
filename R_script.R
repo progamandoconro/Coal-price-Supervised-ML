@@ -8,7 +8,7 @@
 
 	mes <- df$Mes.n + 1 ; mes <- ifelse(mes == 12, 1, mes)
 
-	dat_cruzada <- data.frame(mes,peso,valor,precio)
+	dat_cruzada <- data.frame(mes,peso,valor)
 
   
 
