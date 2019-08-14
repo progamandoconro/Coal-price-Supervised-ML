@@ -12,4 +12,4 @@ RUN echo "install.packages(c('MASS','shiny','shinydashboard'))" > packages_compl
  
 RUN  git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
-RUN Rscript R_sript.R
+RUN Rscript R_script.R
