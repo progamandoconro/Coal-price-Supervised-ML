@@ -9,7 +9,7 @@ RUN echo "install.packages(c('lubridate'))" > packages3_R.R && Rscript packages3
 RUN echo "install.packages(c('randomForest','e1071','neuralnet','caret'))" > packagesML.R && Rscript packagesML.R
 RUN echo "install.packages(c('reticulate','keras'))" > packagesDL.R && Rscript packagesDL.R
 RUN echo "install.packages(c('MASS','shiny','shinydashboard'))" > packages_compl.R && Rscript packages_compl.R
-RUN echo "install.packages('ROSE')" > rose.R && Rscript rose.r
+RUN echo "install.packages('ROSE')" > rose.R && Rscript rose.R
  
 RUN  git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
