@@ -12,7 +12,7 @@
 	
 	df_2 <- data.frame (df$valor, df$peso, Mes.n=mes_dc)
 
-	bind_rows <- (df,df_2)
+	df_3 <- bind_rows (df,df_2)
 
 	
 
