@@ -3,16 +3,52 @@
 
 	library (dplyr)
 
-	df <- read.csv('data_supervised.csv')
-	df$anio_mes <- paste(df[,1],df[,2])
-
-	df$valor <- df$DLI_VALOR_TOTAL.x ; df$peso <- df$DLI_PESO_A_PAGAR.x
-
-	mes_dc <- df$Mes.n + 1 ; mes_dc <- ifelse(mes_dc == 12, 1, mes_dc)
+	input <- read.csv('data_supervised.csv')
 	
-	df_2 <- data.frame (df$valor, df$peso, Mes.n=mes_dc)
 
-	df_3 <- bind_rows (df,df_2)
+	############################################################################################################
+################################################## Litecoin ##################################################
+############################################################################################################
 
+library(dplyr) # Para facilitar la mineria de datos
+library(zoo) # Tratamiento para los datos faltantes
+library(lubridate) # Tratamiento para las fechas en la data
+
+######################## Normalizar la data entre valores desde 0 hasta 1 ###########################################
+ 
+
+                normalize <- function(x) { 
+  return((x - min(x)) / (max(x) - min(x)))
+}
+#input<- lapply(input, normalize)%>%
+ # as.data.frame()
+
+##input_60 <- input[(nrow(input)-60):nrow(input),]  
+#input <- input[1:(nrow(input)-61),] 
+
+#library(MASS)  
+#m = stepAIC(glm(d_train$OUTPUT~.,data = d_train[,-d_train$OUTPUT]))
+
+#detach("package:MASS", unload = TRUE)
+
+
+############ Ejecutar el algoritmo Random Forest #############################################################
+
+library(randomForest)
+
+set.seed(7)   
+#rf <-  randomForest(formula,data = d_train[,-d_train$OUTPUT])
+              
+#p_60 <- predict(rf, input_60[,colnames(input[,-input$OUTPUT]) ])
+##################### Graficar los resultados #################################################################
+                
+jpeg('plot_carbon.jpg')
+                
+plot(1,1,xlab = 'Días desde creación', ylab = 'Precio escalado ($ COL)')
+#points(p_60,col=2)  
+#lines(p_60,col=2)  
+#lines(input_60$OUTPUT)
+                
+dev.off() 
 	
 
