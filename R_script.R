@@ -2,8 +2,6 @@
 # 2019. Rodrigo Diaz-Lupanow (programandoconro). Code for private client.  
 
 library(dplyr) # Para facilitar la mineria de datos
-library(zoo) # Tratamiento para los datos faltantes
-library(lubridate) # Tratamiento para las fechas en la data
 
  normalize <- function(x) { 
   return((x - min(x)) / (max(x) - min(x)))
@@ -76,4 +74,15 @@ set.seed(7)
                 
 #dev.off() 
 	
+
+# Crear factores mas largos rellenados con na, luego usar zoo para rellenar. De esta forma obtener data mensual homomenea perdiendo poca informacion
+
+
+library(zoo) # Tratamiento para los datos faltantes
+
+#input$Anio_Mes <- paste (input$Mes.n,intput$Anio.n)
+
+#na.aggregate(input,by=input$Anio_Mes)
+
+
 
