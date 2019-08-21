@@ -10,6 +10,7 @@ RUN echo "install.packages(c('reticulate','keras'))" > packagesDL.R && Rscript p
 RUN echo "install.packages(c('MASS','shiny','shinydashboard'))" > packages_compl.R && Rscript packages_compl.R
 RUN echo "install.packages(c('ROSE','dplyr'))" > rose.R && Rscript rose.R
 RUN echo "install.packages(c('ggplot2', 'plotly'))" > plots.R && Rscript plots.R
+RUN apt-get install nano
 RUN git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
 RUN Rscript R_script.R
