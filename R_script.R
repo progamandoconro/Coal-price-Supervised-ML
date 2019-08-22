@@ -1,5 +1,3 @@
-# Precio Futuro del .	
-# 2019. Rodrigo Diaz-Lupanow (programandoconro). Code for private client.  
 
 library(dplyr) # Para facilitar la mineria de datos
 
@@ -7,8 +5,9 @@ library(dplyr) # Para facilitar la mineria de datos
   return((x - min(x)) / (max(x) - min(x)))
 }
 
-	
-	
+RMSE = function(e, o){
+  sqrt(mean((e - o)^2))
+}
 
 	############################################################################################################
 ################################################## Valor a pagar ##################################################
@@ -17,15 +16,15 @@ library(dplyr) # Para facilitar la mineria de datos
 ######################## Data ###########################################	
 ######################## Normalizar la data entre valores desde 0 hasta 1 ###########################################
 
-input <- read.csv('data_supervised.csv')[,-18:-19]%>%
+df <- read.csv('data_supervised.csv')[,-18:-19]%>%
                lapply( normalize)%>%
 		as.data.frame() 
             
 
 ################################# Guardemos los 600 datos como test final ###################################
 
-input_600 <- input[(nrow(input)-600):nrow(input),]  
-input <- input[1:(nrow(input)-601),] 
+input_600 <- df[(nrow(df)-599):nrow(df),]  
+input <- df[1:(nrow(df)-600),] 
 
 
 ################################ Mezclemos la data y guardemos una parte para validar #######################
@@ -40,29 +39,61 @@ valida = input[-1:-(NROW(index)* 0.7),]
 library(randomForest)
 
 set.seed(7)   
-rf <-  randomForest(train$DLI_VALOR_TOTAL.x ~.,data = train[,-train$DLI_VALOR_TOTAL.x])
+rf <-  randomForest(train$DLI_VALOR_TOTAL.x ~.,
+data = train[,-train$DLI_VALOR_TOTAL.x])
 
 res_val <- predict (rf,valida)
 
 cor (res_val, valida$DLI_VALOR_TOTAL.x)
 
+RMSE(res_val, valida$DLI_VALOR_TOTAL.x)
+
 #################################### Veamos la data test #######################################
+
+res_test <- predict (rf,input_600)
+
+cor (res_test, input_600$DLI_VALOR_TOTAL.x)
+
+RMSE(res_test, input_600$DLI_VALOR_TOTAL.x)
+
+# [1] 0.1245428
+
+
 
 ################################### Escojamos un modelo utilizando Akaike ################################## 
 
 
-#library(MASS)  
-#m = stepAIC(glm(d_train$OUTPUT~.,data = d_train[,-d_train$OUTPUT]))
+library(MASS)  
+m = stepAIC(glm(train$DLI_VALOR_TOTAL.x~.,
+data = train[,-train$DLI_VALOR_TOTAL.x]))
 
-#detach("package:MASS", unload = TRUE)
+detach("package:MASS", unload = TRUE)
 
 
 ############ Ejecutar el algoritmo Random Forest #############################################################
 
 set.seed(7)   
-#rf <-  randomForest(m$formula,data = d_train[,-d_train$OUTPUT])
-              
-#p_60 <- predict(rf, input_60[,colnames(input[,-input$OUTPUT]) ])
+rf_AIC <-  randomForest(m$formula,
+data = train[,-train$DLI_VALOR_TOTAL.x])
+   
+res_val <- predict (rf_AIC,valida)
+
+cor (res_val, valida$DLI_VALOR_TOTAL.x)
+
+RMSE(res_val, valida$DLI_VALOR_TOTAL.x)
+
+
+res_test <- predict (rf_AIC,input_600)
+
+cor (res_test, input_600$DLI_VALOR_TOTAL.x)
+
+RMSE(res_test, input_600$DLI_VALOR_TOTAL.x)
+
+
+#[1] 0.1244271
+
+
+
 ##################### Graficar los resultados #################################################################
                 
 #jpeg('plot_carbon.jpg')
@@ -73,16 +104,44 @@ set.seed(7)
 #lines(input_60$OUTPUT)
                 
 #dev.off() 
-	
-
-# Crear factores mas largos rellenados con na, luego usar zoo para rellenar. De esta forma obtener data mensual homomenea perdiendo poca informacion
 
 
-library(zoo) # Tratamiento para los datos faltantes
 
-#input$Anio_Mes <- paste (input$Mes.n,intput$Anio.n)
 
-#na.aggregate(input,by=input$Anio_Mes)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
