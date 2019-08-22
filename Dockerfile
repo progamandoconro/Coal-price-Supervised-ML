@@ -11,11 +11,10 @@ RUN echo "install.packages(c('MASS','shiny','shinydashboard'))" > packages_compl
 RUN echo "install.packages(c('ROSE','dplyr','stringr'))" > mining.R && Rscript mining.R
 RUN echo "install.packages(c('ggplot2', 'plotly'))" > plots.R && Rscript plots.R
 RUN apt-get install nano -y
+
 RUN echo "download.file\
 ('https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx'\
 ,destfile='precio_carbon.xlsx')" > data.R && Rscript data.R
-
-Rscript packages.R data.R
 
 RUN git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
