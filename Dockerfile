@@ -18,4 +18,4 @@ RUN echo "download.file\
 
 RUN git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
-RUN Rscript R_script.R
+RUN Rscript script.R
