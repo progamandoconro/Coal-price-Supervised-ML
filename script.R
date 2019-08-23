@@ -18,7 +18,7 @@
 
 # Data base
 
-	df = read.csv("FD-04_minero_21062019.csv")
+	df = read.csv("precio_carbon.csv")
 
 
 	fecha <- parse_date_time(dat_1$ENT_FECHA_ENTRADA,
