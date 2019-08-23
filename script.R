@@ -18,7 +18,7 @@
 
 # Data base
 
-	df = read.csv("precio_carbon.csv")
+	df = read.csv("df.csv")
 
 
 	fecha <- parse_date_time(df$ENT_FECHA_ENTRADA,
