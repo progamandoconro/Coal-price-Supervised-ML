@@ -21,7 +21,7 @@
 	df = read.csv("precio_carbon.csv")
 
 
-	fecha <- parse_date_time(dat_1$ENT_FECHA_ENTRADA,
+	fecha <- parse_date_time(df$ENT_FECHA_ENTRADA,
 	orders = "%Y-%m-%d %H:%M:%S")
 
 	mes <- month(as.POSIXlt(fecha, format="%Y-%m-%d %H:%M:%S"))
