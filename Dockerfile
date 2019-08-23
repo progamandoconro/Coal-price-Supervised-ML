@@ -8,4 +8,4 @@ RUN git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
 RUN echo "download.file\
 ('https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx'\
-,destfile='precio_carbon.xlsx')" > data.R && Rscript data.R  script.R
+,destfile='precio_carbon.csv')" > data.R && Rscript data.R  script.R
