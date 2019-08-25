@@ -2,7 +2,8 @@
 
 	library(dplyr) # Código con arquitectura de tuberías (%>%) 
 	library(zoo) # Homogeneizar la cantidad de datos por mes
-       	library(lubridate)
+       	library(openxlsx)
+	library(lubridate)
 	library(dplyr)
 	library(stringr)
 
@@ -18,17 +19,16 @@
 
 # Data base
 
-	df = read.csv("df.csv")
+download.file(
+'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
+destfile='precio_carbon.xlsx')
 
+df=read.xlsx('precio_carbon.xlsx')
 
-	fecha <- parse_date_time(df$ENT_FECHA_ENTRADA,
-	orders = "%Y-%m-%d %H:%M:%S")
-
-	mes <- month(as.POSIXlt(fecha, format="%Y-%m-%d %H:%M:%S"))
-
-	anio <- year(as.POSIXlt(fecha, format="%Y-%m-%d %H:%M:%S"))
-
-	mes_anio <-paste(anio,mes)
+fecha <- parse_date_time(df$ENT_FECHA_ENTRADA,orders = "%Y%m%d%H%M%S")
+df$anio <- year(as.POSIXlt(fecha, format="%Y-%m-%d %H:%M:%S"))
+df$mes <- month(as.POSIXlt(fecha, format="%Y-%m-%d %H:%M:%S"))
+unid_tiempo <-paste(df$anio,df$mes)
 
 	input = df [, c(-3,-4,-6)]
 
