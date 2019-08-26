@@ -1,4 +1,4 @@
-        library(zoo) # Homogeneizar la cantidad de datos por mes
+              library(zoo) # Homogeneizar la cantidad de datos por mes
         library(openxlsx)
         library(lubridate)
         library(dplyr)
@@ -18,9 +18,9 @@
 
 # Data base
 
-download.file(
-'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
-destfile='precio_carbon.xlsx')
+#download.file(
+#'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
+#destfile='precio_carbon.xlsx')
 
 df=read.xlsx('precio_carbon.xlsx')
 
@@ -75,8 +75,88 @@ model %>% summary()
 
 model %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
  
-#scores = model %>% evaluate(df_cruz[,-1], df_cruz[,1], verbose = 0)
-#print(scores)
+scores = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+print(scores)
 
 
+
+
+
+
+##### 3 meses
+
+
+
+input<ss- train[1:(nrow(train)-8826),c(-5,-18)]
+output<-train$DLI_PESO_A_PAGAR[8827:nrow(train)]
+
+
+df_cruz <- data.frame(output,input)%>%
+lapply(normalizar) %>% as.data.frame()
+
+
+#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
+#write.csv(test,'test.csv',row.names=F)
+
+
+model2 = keras_model_sequential() %>% 
+   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
+   layer_dense(units=32, activation = "relu") %>% 
+   layer_dense(units=1, activation="linear")
+ 
+model2 %>% compile(
+   loss = "mse",
+   optimizer =  "adam", 
+   metrics = list("mean_absolute_error")
+ )
+ 
+model2 %>% summary()
+
+
+model2 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
+ 
+scores2 = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+print(scores2)
+
+
+
+
+#6 meses
+
+input<- train[1:(nrow(train)-17652),c(-5,-18)]
+output<-train$DLI_PESO_A_PAGAR[17653:nrow(train)]
+
+
+df_cruz <- data.frame(output,input)%>%
+lapply(normalizar) %>% as.data.frame()
+
+
+#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
+#write.csv(test,'test.csv',row.names=F)
+
+
+model3 = keras_model_sequential() %>% 
+   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
+   layer_dense(units=32, activation = "relu") %>% 
+   layer_dense(units=1, activation="linear")
+ 
+model3 %>% compile(
+   loss = "mse",
+   optimizer =  "adam", 
+   metrics = list("mean_absolute_error")
+ )
+ 
+model3 %>% summary()
+
+
+model3 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
+ 
+scores3 = model3 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+print(scores3)
+
+
+
+scores
+scores2
+scores3
 
