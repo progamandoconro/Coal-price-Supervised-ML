@@ -1,11 +1,10 @@
-
         library(openxlsx)
         library(lubridate)
         library(dplyr)
         library(stringr)
 	library(groupdata2)
 	library(keras)
-
+	library(e1071)
 # Funciones necesarias:
 
         normalizar <- function(x) {
@@ -18,9 +17,9 @@
 
 # Data base
 
-#download.file(
-#'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
-#destfile='precio_carbon.xlsx')
+download.file(
+'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
+destfile='precio_carbon.xlsx')
 
 df=read.xlsx('precio_carbon.xlsx')
 
@@ -59,9 +58,11 @@ lapply(normalizar) %>% as.data.frame()
 #write.csv(test,'test.csv',row.names=F)
 
 
+# Predicciones para el mes proximo
+
 model = keras_model_sequential() %>% 
    layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=32, activation = "relu") %>% 
+   layer_dense(units=5, activation = "relu") %>% 
    layer_dense(units=1, activation="linear")
  
 model %>% compile(
@@ -78,9 +79,9 @@ model %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
 scores = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores)
 
-##### 3 meses
+#3 meses
 
-input<ss- train[1:(nrow(train)-8826),c(-5,-18)]
+input<- train[1:(nrow(train)-8826),c(-5,-18)]
 output<-train$DLI_PESO_A_PAGAR[8827:nrow(train)]
 
 
@@ -94,7 +95,7 @@ lapply(normalizar) %>% as.data.frame()
 
 model2 = keras_model_sequential() %>% 
    layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=32, activation = "relu") %>% 
+   layer_dense(units=5, activation = "relu") %>% 
    layer_dense(units=1, activation="linear")
  
 model2 %>% compile(
@@ -108,7 +109,7 @@ model2 %>% summary()
 
 model2 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
  
-scores2 = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+scores2 = model2 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores2)
 
 #6 meses
@@ -127,7 +128,7 @@ lapply(normalizar) %>% as.data.frame()
 
 model3 = keras_model_sequential() %>% 
    layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=32, activation = "relu") %>% 
+   layer_dense(units=5, activation = "relu") %>% 
    layer_dense(units=1, activation="linear")
  
 model3 %>% compile(
@@ -144,7 +145,43 @@ model3 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
 scores3 = model3 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores3)
 
+#12 meses
 
+input<- train[1:(nrow(train)-35304),c(-5,-18)]
+output<-train$DLI_PESO_A_PAGAR[35305:nrow(train)]
+
+
+df_cruz <- data.frame(output,input)%>%
+lapply(normalizar) %>% as.data.frame()
+
+
+#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
+#write.csv(test,'test.csv',row.names=F)
+
+
+model4 = keras_model_sequential() %>% 
+   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
+   layer_dense(units=5, activation = "relu") %>% 
+   layer_dense(units=1, activation="linear")
+ 
+model4 %>% compile(
+   loss = "mse",
+   optimizer =  "adam", 
+   metrics = list("mean_absolute_error")
+ )
+ 
+model4 %>% summary()
+
+
+model4 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
+ 
+scores4 = model4 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+print(scores4)
+
+
+
+
+############ 
 scores
 scores2
 scores3
