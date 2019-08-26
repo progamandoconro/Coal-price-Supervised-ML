@@ -1,11 +1,11 @@
-              library(zoo) # Homogeneizar la cantidad de datos por mes
+
         library(openxlsx)
         library(lubridate)
         library(dplyr)
         library(stringr)
 	library(groupdata2)
 	library(keras)
-	library(e1071)
+
 # Funciones necesarias:
 
         normalizar <- function(x) {
@@ -78,14 +78,7 @@ model %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
 scores = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores)
 
-
-
-
-
-
 ##### 3 meses
-
-
 
 input<ss- train[1:(nrow(train)-8826),c(-5,-18)]
 output<-train$DLI_PESO_A_PAGAR[8827:nrow(train)]
@@ -117,9 +110,6 @@ model2 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
  
 scores2 = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores2)
-
-
-
 
 #6 meses
 
@@ -153,7 +143,6 @@ model3 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
  
 scores3 = model3 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
 print(scores3)
-
 
 
 scores
