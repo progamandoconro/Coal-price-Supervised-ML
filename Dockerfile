@@ -1,11 +1,10 @@
 FROM debian
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install r-base python-pip git libreoffice nano -y 
-RUN echo "install.packages(c('openxlsx','zoo','lubridate','dplyr','stringr'))" > lib_mineria.R && Rscript lib_mineria.R
-RUN echo "install.packages (c('shiny','shinydashboard','ROSE','ggplot2'))" > lib_graf.R && Rscript lib_graf.R 
-RUN echo "install.packages(c('RandomForest','e1071','neuralnet','caret','reticulate','keras'))" > lib_ML.R && Rscript lib_ML.R
+RUN apt-get install r-base python-pip git nano -y 
+RUN echo "install.packages('keras') ; library (keras) ; install_keras()" > keras.R && Rscript keras.R
 RUN /usr/bin/python2.7 -m pip install --upgrade --user virtualenv
-RUN echo "library (keras) ; install_keras()" > keras.R && Rscript keras.R
+RUN echo "install.packages(c('openxlsx','lubridate','dplyr','stringr','ROSE','reticulate'))" > libs.R && Rscript libs.R
+RUN echo "install.packages(c('RandomForest','e1071','neuralnet','caret'))" > libs_ML.R && Rscript libs_ML.R
 RUN git clone https://github.com/progamandoconro/carbon-prediction
 WORKDIR carbon-prediction
 RUN echo "download.file\
