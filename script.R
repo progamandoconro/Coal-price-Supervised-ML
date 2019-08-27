@@ -17,9 +17,9 @@
 
 # Data base
 
-download.file(
-'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
-destfile='precio_carbon.xlsx')
+#download.file(
+#'https://programandoconro.files.wordpress.com/2019/08/carbon_colombia.xlsx',
+#destfile='precio_carbon.xlsx')
 
 df=read.xlsx('precio_carbon.xlsx')
 
@@ -46,27 +46,38 @@ test <- df[df$anio<2010 | df$anio>2018 | df$anio==2017,]
 
 #cruzar datos
 
-input<- train[1:(nrow(train)-2942),c(-5,-18)]
-output<-train$DLI_PESO_A_PAGAR[2943:nrow(train)]
+m=1 #meses a predecir en el futuro
+
+n=2942*m
+
+input<- train[1:(nrow(train)-n),c(-5,-18)]
+output<-train$DLI_PESO_A_PAGAR[(n+1):nrow(train)]
 
 
 df_cruz <- data.frame(output,input)%>%
 lapply(normalizar) %>% as.data.frame()
 
+set.seed(777)
+
+index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+
+train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+
+val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+
 
 #write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
 #write.csv(test,'test.csv',row.names=F)
 
-
 # Predicciones para el mes proximo
 
 model = keras_model_sequential() %>% 
-   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
+   layer_dense(units=ncol(train[,-1]), activation="relu", input_shape=ncol(train[,-1])) %>% 
    layer_dense(units=5, activation = "relu") %>% 
    layer_dense(units=1, activation="linear")
  
 model %>% compile(
-   loss = "mse",
+   loss = "mae",
    optimizer =  "adam", 
    metrics = list("mean_absolute_error")
  )
@@ -74,115 +85,9 @@ model %>% compile(
 model %>% summary()
 
 
-model %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
+model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 10,verbose = 0)
  
-scores = model %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
+scores = model %>% evaluate(as.matrix(train[,-1]), train[,1], verbose = 0)
 print(scores)
 
-#3 meses
-
-input<- train[1:(nrow(train)-8826),c(-5,-18)]
-output<-train$DLI_PESO_A_PAGAR[8827:nrow(train)]
-
-
-df_cruz <- data.frame(output,input)%>%
-lapply(normalizar) %>% as.data.frame()
-
-
-#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
-#write.csv(test,'test.csv',row.names=F)
-
-
-model2 = keras_model_sequential() %>% 
-   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=5, activation = "relu") %>% 
-   layer_dense(units=1, activation="linear")
- 
-model2 %>% compile(
-   loss = "mse",
-   optimizer =  "adam", 
-   metrics = list("mean_absolute_error")
- )
- 
-model2 %>% summary()
-
-
-model2 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
- 
-scores2 = model2 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
-print(scores2)
-
-#6 meses
-
-input<- train[1:(nrow(train)-17652),c(-5,-18)]
-output<-train$DLI_PESO_A_PAGAR[17653:nrow(train)]
-
-
-df_cruz <- data.frame(output,input)%>%
-lapply(normalizar) %>% as.data.frame()
-
-
-#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
-#write.csv(test,'test.csv',row.names=F)
-
-
-model3 = keras_model_sequential() %>% 
-   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=5, activation = "relu") %>% 
-   layer_dense(units=1, activation="linear")
- 
-model3 %>% compile(
-   loss = "mse",
-   optimizer =  "adam", 
-   metrics = list("mean_absolute_error")
- )
- 
-model3 %>% summary()
-
-
-model3 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
- 
-scores3 = model3 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
-print(scores3)
-
-#12 meses
-
-input<- train[1:(nrow(train)-35304),c(-5,-18)]
-output<-train$DLI_PESO_A_PAGAR[35305:nrow(train)]
-
-
-df_cruz <- data.frame(output,input)%>%
-lapply(normalizar) %>% as.data.frame()
-
-
-#write.csv(df_cruz, 'data_cruzada.csv',row.names=F)
-#write.csv(test,'test.csv',row.names=F)
-
-
-model4 = keras_model_sequential() %>% 
-   layer_dense(units=ncol(input), activation="relu", input_shape=ncol(input)) %>% 
-   layer_dense(units=5, activation = "relu") %>% 
-   layer_dense(units=1, activation="linear")
- 
-model4 %>% compile(
-   loss = "mse",
-   optimizer =  "adam", 
-   metrics = list("mean_absolute_error")
- )
- 
-model4 %>% summary()
-
-
-model4 %>% fit(as.matrix(df_cruz[,-1]), df_cruz[,1], epochs = 100,verbose = 0)
- 
-scores4 = model4 %>% evaluate(as.matrix(df_cruz[,-1]), df_cruz[,1], verbose = 0)
-print(scores4)
-
-
-
-
-############ 
-scores
-scores2
-scores3
 
