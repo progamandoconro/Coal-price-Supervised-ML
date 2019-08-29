@@ -5,6 +5,7 @@
 	library(groupdata2)
 	library(keras)
 	library(e1071)
+	library(tensorflow)
 # Funciones necesarias:
 
         normalizar <- function(x) {
@@ -72,14 +73,13 @@ val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
 # Predicciones para el mes proximo
 
 model = keras_model_sequential() %>% 
-   layer_dense(units=ncol(train[,-1]), activation="relu", input_shape=ncol(train[,-1])) %>% 
-   layer_dense(units=5, activation = "relu") %>% 
-   layer_dense(units=1, activation="linear")
+   layer_dense(units=25, activation="relu", input_shape=ncol(train[,-1])) %>% 
+   layer_dense(units=10, activation = "relu") %>% 
+   layer_dense(units=1)
  
 model %>% compile(
-   loss = "mae",
-   optimizer =  "adam", 
-   metrics = list("mean_absolute_error")
+   loss = "mean_squared_error",
+   optimizer =  "adam"
  )
  
 model %>% summary()
