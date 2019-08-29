@@ -92,13 +92,13 @@ print(scores)
 
 p <- predict (model, as.matrix(val[,-1]))
 
-RMSE (p,val[,1])
+a=RMSE (p,val[,1])
 
-cor (p,val[,1])
+b=cor (p,val[,1])
 
-summary(lm(p~val[,1],data=val))
+c=summary(lm(p~val[,1],data=val))
 
-
+write.csv(data.frame(a,b,c),'validation.csv')
 
 
 
