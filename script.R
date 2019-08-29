@@ -71,22 +71,22 @@ val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
 
 # Predicciones para el mes proximo
 
-model = keras_model_sequential() %>% 
-   layer_dense(units=25, activation="relu", input_shape=ncol(train[,-1])) %>% 
-   layer_dense(units=10, activation = "relu") %>% 
-   layer_dense(units=1)
- 
+model = keras_model_sequential() %>%
+   layer_dense(units=250, activation="softmax", input_shape=ncol(train[,-1])) %>%
+   layer_dense(units=10, activation = "softmax") %>%
+   layer_dense(units=1,activation='linear')
+
 model %>% compile(
-   loss = "mean_squared_error",
-   optimizer =  "adam"
+   loss = "mse",
+   optimizer =  "rmsprop"
  )
- 
+
 model %>% summary()
 
 
-model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 10,verbose = 0)
- 
-scores = model %>% evaluate(as.matrix(train[,-1]), train[,1], verbose = 0)
+model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 10,verbose = 1,batch_size=250)
+
+scores = model %>% evaluate(as.matrix(train[,-1]), train[,1], verbose = 1)
 print(scores)
 
 p <- predict (model, as.matrix(val[,-1]))
@@ -95,9 +95,12 @@ a=RMSE (p,val[,1])
 
 b=cor (p,val[,1])
 
-#c=summary(lm(p~val[,1],data=val))
 
-#write.csv(data.frame(a,b),'validation.csv')
+write.csv(a,'rmse.csv')
+write.csv(b,'cor.csv')
+
+
+
 
 
 
