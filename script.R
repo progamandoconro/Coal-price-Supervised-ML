@@ -90,4 +90,16 @@ model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 10,verbose = 0)
 scores = model %>% evaluate(as.matrix(train[,-1]), train[,1], verbose = 0)
 print(scores)
 
+p <- predict (model, as.matrix(val[,-1]))
+
+RMSE (p,val[,1])
+
+cor (p,val[,1])
+
+summary(lm(p~val[,1],data=val))
+
+
+
+
+
 
