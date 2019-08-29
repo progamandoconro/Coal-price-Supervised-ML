@@ -97,7 +97,7 @@ b=cor (p,val[,1])
 
 #c=summary(lm(p~val[,1],data=val))
 
-write.csv(data.frame(a,b),'validation.csv')
+#write.csv(data.frame(a,b),'validation.csv')
 
 
 
