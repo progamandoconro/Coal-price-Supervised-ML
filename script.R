@@ -7,7 +7,6 @@
         library(stringr)
         library(groupdata2)
         library(keras)
-        library(e1071)
 	library(tensorflow)
 
 # Funciones necesarias:
