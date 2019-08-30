@@ -111,7 +111,7 @@ write.csv(b,'cor.csv')
 
 png('plot1.png')
 plot(p,val[,1])
-dev(off)
+
 
 
 
