@@ -2,16 +2,16 @@
         library(lubridate)
         library(dplyr)
         library(stringr)
-	library(groupdata2)
-	library(keras)
-	library(tensorflow)
+        library(groupdata2)
+        library(keras)
+        library(tensorflow)
 # Funciones necesarias:
 
         normalizar <- function(x) {
         return((x - min(x)) / (max(x) - min(x)))
         }
 
-	RMSE = function(esperados, observados){
+        RMSE = function(esperados, observados){
         sqrt(mean((esperados - observados)^2))
         }
 
@@ -38,7 +38,6 @@ train <- df[df$anio>2009 & df$anio<2019 & df$anio != 2017,]%>%
                    balance(size='median', cat_col='unid_tiempo')
 
 
-
 test <- df[df$anio<2010 | df$anio>2018 | df$anio==2017,]
 
 #table(df$mes,df$anio)
@@ -54,9 +53,8 @@ input<- train[1:(nrow(train)-n),c(-5,-18)]
 output<-train$DLI_PESO_A_PAGAR[(n+1):nrow(train)]
 
 
-df_cruz <- data.frame(output,input)%>%
-lapply(normalizar) %>% as.data.frame()
-
+df_cruz <- data.frame(output,input) #%>%
+#lapply(normalizar) %>% as.data.frame()
 set.seed(777)
 
 index <- sample(1:nrow(df_cruz),nrow(df_cruz))
@@ -76,6 +74,7 @@ model = keras_model_sequential() %>%
    layer_dense(units=10, activation = "softmax") %>%
    layer_dense(units=1,activation='linear')
 
+
 model %>% compile(
    loss = "mse",
    optimizer =  "rmsprop"
@@ -84,7 +83,7 @@ model %>% compile(
 model %>% summary()
 
 
-model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 10,verbose = 1,batch_size=250)
+model %>% fit(as.matrix(train[,-1]), train[,1], epochs = 20,verbose = 1,batch_size=250)
 
 scores = model %>% evaluate(as.matrix(train[,-1]), train[,1], verbose = 1)
 print(scores)
@@ -98,8 +97,6 @@ b=cor (p,val[,1])
 
 write.csv(a,'rmse.csv')
 write.csv(b,'cor.csv')
-
-
 
 
 
