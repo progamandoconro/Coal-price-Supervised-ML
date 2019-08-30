@@ -61,7 +61,7 @@ output<-train$DLI_PESO_A_PAGAR[(n+1):nrow(train)]
 
 df_cruz <- data.frame(output,input)
 
-df_cruz<- for i in 1:ncol(df_cruz){
+df_cruz<- for (i in 1:ncol(df_cruz)){
         
         ifelse(df_cruz[,i]==0,mean(df_cruz[,i],df_cruz)
                
