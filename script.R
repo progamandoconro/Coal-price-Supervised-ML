@@ -61,22 +61,13 @@ output<-train$DLI_PESO_A_PAGAR[(n+1):nrow(train)]
 
 df_cruz <- data.frame(output,input)
 
-df_cruz<- for (i in 1:ncol(df_cruz)) {
-        
-        ifelse(df_cruz[,i]==0,mean(df_cruz[,i]),df_cruz)
-               
-               }
 
-
-lapply(df_cruz,normalizar) %>% 
+df_cruz<- lapply(df_cruz,normalizar) %>% 
 			as.data.frame()
 
 set.seed(777)
 
 index <- sample(1:nrow(df_cruz),nrow(df_cruz))
-
-
-
 
 train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
 
