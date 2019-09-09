@@ -1,7 +1,7 @@
 # Coal-price-prediction
 
 
-![alt text](/home/toshiba/pictures/carbon.png "Title")
+![alt text](https://github.com/progamandoconro/carbon-prediction "Title")
 
 
 
