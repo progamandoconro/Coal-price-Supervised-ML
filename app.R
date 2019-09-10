@@ -95,7 +95,7 @@ p <- predict(rF, test)
     
 g <- ggplot(data=test,aes(x=1:nrow(test),y=test[,12]))
 
-g+ geom_point(aes(col='Data test'))+geom_line(aes(col='Data test'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
+g+ geom_point(aes(col='Data evaluación'))+geom_line(aes(col='Data evaluación'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
 xlab('Días laborables (28 en cada mes)')+ylab('Peso a Pagar (Ton)')
 
 
