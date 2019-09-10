@@ -48,8 +48,6 @@ ui <- fluidPage(
 
     # Main panel for displaying outputs ----
     mainPanel(
-
-    ,
 h5("Data de evaluación: últimos 300 registros (28 registros / mes), los cuales no fueron suministrados para el entrenamiento y aprendizaje del algoritmo. Esta sección de la data es utilizada para la evaluación del desempeño final del algoritmo"),
 
 h5("Predicciones del algoritmo Random Forest para la variable PESO A PAGAR (TON) sobre los datos de evaluación"),	
