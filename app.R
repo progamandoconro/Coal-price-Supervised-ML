@@ -49,8 +49,12 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
 
-      # Output: Histogram ----
+    ,
+h5("Data de evaluación: últimos 300 registros (28 registros / mes), los cuales no fueron suministrados para el entrenamiento y aprendizaje del algoritmo. Esta sección de la data es utilizada para la evaluación del desempeño final del algoritmo"),
+
+h5("Predicciones del algoritmo Random Forest para la variable PESO A PAGAR (TON) sobre los datos de evaluación"),	
       plotOutput(outputId = "distPlot"),
+("Predicciones del algoritmo Random Forest para la variable VALOR DEL CARBÓN ($COL) sobre los datos de evaluación"),	
       plotOutput(outputId = "distPlot2")
 
     )
@@ -59,14 +63,6 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  # Histogram of the Old Faithful Geyser Data ----
-  # with requested number of bins
-  # This expression that generates a histogram is wrapped in a call
-  # to renderPlot to indicate that:
-  #
-  # 1. It is "reactive" and therefore should be automatically
-  #    re-executed when inputs (input$bins) change
-  # 2. Its output type is a plot
   output$distPlot <- renderPlot({
 
 m=input$mes_fut
@@ -144,7 +140,7 @@ p <- predict(rF, test)
     
 g <- ggplot(data=test,aes(x=1:nrow(test),y=test[,'DLI_VALOR_TOTAL.x']))
 
-g+ geom_point(aes(col='Data test'))+geom_line(aes(col='Data test'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
+g+ geom_point(aes(col='Data evaluación'))+geom_line(aes(col='Data evaluación'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
 xlab('Días laborables (28 en cada mes)')+ylab('Valor total ($COL)')
 
 
