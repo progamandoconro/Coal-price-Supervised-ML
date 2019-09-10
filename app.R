@@ -1,55 +1,4 @@
 library(shiny)
-library(dplyr)
-library(zoo)
-library(randomForest)
-library(groupdata2)
-library(ggplot2)
-
-RMSE = function(esperados, observados){
-sqrt(mean((esperados - observados)^2))
-} 
-
-df=read.csv('carbon_3.csv')
-
-df <- select (df,-starts_with("date"))%>%
-  select(-starts_with("date."))%>%
-  na.aggregate(by='Anio')%>%
-  na.aggregate(by='Mes')%>%
-  na.aggregate(by='Dia')%>%
-  na.aggregate()
-
-df$cat= paste(df[,1], df[,2])
-df$cat=as.factor(df$cat)
-levels(df$cat) <- 1:118
-
-df <- balance(df,size='max', cat_col='cat')
-
-
-# Define UI for app that draws a histogram ----
-ui <- fluidPage(
-
-  # App title ----
-  titlePanel("Predicciones del precio futuro del carbón con algoritmos de aprendizaje automatizado"),
-
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
-
-      # Input: Slider for the number of bins ----
-      sliderInput(inputId = "mes_fut",
-                  label = "Meses futuros a predecir",
-                  min = 1,
-                  max = 50,
-                  value = 1)
-
-    ),
-
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-library(shiny)
 library(ggplot2)
 library(dplyr)
 library(zoo)
@@ -162,6 +111,3 @@ xlab('Días laborables (28 en cada mes)')+ylab('Peso a Pagar (Ton)')
 
 
 shinyApp(ui,server)
-
-
-
