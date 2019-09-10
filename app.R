@@ -36,7 +36,7 @@ ui <- fluidPage(
 
     # Sidebar panel for inputs ----
     sidebarPanel(
-	selectInput("TARGET", "Variable a predecir",c("DLI_PESO_A_PAGAR","DLI_VALOR_A_PAGAR")),
+	
       # Input: Slider for the number of bins ----
       sliderInput(inputId = "mes_fut",
                   label = "Meses futuros a predecir",
@@ -50,7 +50,8 @@ ui <- fluidPage(
     mainPanel(
 
       # Output: Histogram ----
-      plotOutput(outputId = "distPlot")
+      plotOutput(outputId = "distPlot"),
+      plotOutput(outputId = "distPlot2")
 
     )
   )
@@ -67,13 +68,13 @@ server <- function(input, output) {
   #    re-executed when inputs (input$bins) change
   # 2. Its output type is a plot
   output$distPlot <- renderPlot({
-TARGET=input$TARGET
+
 m=input$mes_fut
 n=28*m
 
 input<- df[1:(nrow(df)-n),-47]
 
-output<-df$TARGET[(n+1):nrow(df)]
+output<-df$DLI_PESO_A_PAGAR[(n+1):nrow(df)]
 
 df_cruz <- data.frame(output,input)
 
@@ -102,6 +103,49 @@ g <- ggplot(data=test,aes(x=1:nrow(test),y=test[,12]))
 
 g+ geom_point(aes(col='Data test'))+geom_line(aes(col='Data test'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
 xlab('Días laborables (28 en cada mes)')+ylab('Peso a Pagar (Ton)')
+
+
+
+    })
+
+
+
+  output$distPlot2 <- renderPlot({
+
+m=input$mes_fut
+n=28*m
+
+input<- df[1:(nrow(df)-n),-47]
+
+output<-df$DLI_VALOR_TOTAL.x[(n+1):nrow(df)]
+
+df_cruz <- data.frame(output,input)
+
+test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
+
+df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+set.seed(777)
+
+index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+
+train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+
+val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+
+rF <- randomForest (train$DLI_VALOR_TOTAL.x~., data=train, scale=T)
+
+#p <- predict(rF, val[,-12])
+#cor(p,val[,12])
+#RMSE(p,val[,12])
+#plot(p,val[,12])
+
+p <- predict(rF, test)
+
+    
+g <- ggplot(data=test,aes(x=1:nrow(test),y=test[,'DLI_VALOR_TOTAL.x']))
+
+g+ geom_point(aes(col='Data test'))+geom_line(aes(col='Data test'))+geom_point(aes(y=p,col='Predicciones'))+geom_line(aes(y=p,col='Predicciones'))+
+xlab('Días laborables (28 en cada mes)')+ylab('Valor total ($COL)')
 
 
 
