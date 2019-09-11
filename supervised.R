@@ -58,7 +58,7 @@ plot(p,val[,12])
 
 p <- predict(rF, test)
 
-plot(test[,12],xlab='Registros diarios más recientes',ylab='Peso a pagar ($COL)',ylim=c(16,30))
+plot(test[,12],xlab='Registros diarios más recientes',ylab='Peso a pagar (TON)',ylim=c(16,30))
 lines(test[,12])
 lines(p,col=2)
 points(p,col=2)
