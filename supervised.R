@@ -73,22 +73,21 @@ train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
 
 val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
 
-rF <- randomForest (as.factor(train$output)~., data=train, scale=T)
-svm <- svm (as.factor(train$output)~., data=train, scale=T,type="C-Classification")
+rF <- randomForest (as.factor(train$output)~., data=train[,-1], scale=T)
+svm <- svm (as.factor(train$output)~., data=train[,-1], scale=T)
 
-p <- predict(svm, as.factor(val))
-p2 <- predict(rF, as.factor(val))
+p <- predict(svm, val[,-1])
+p2 <- predict(rF, val[,-1])
 
 confusionMatrix(p,as.factor(val[,1]))
 confusionMatrix(p2,as.factor(val[,1]))
 
+net=neuralnet(train$output~., data=train[,-1], hidden=ncol(train)-1,linear.output=F,stepmax=10e06)
 
-
-net=neuralnet(train[,1]~., data=train, linear.output=F)
-
-p3=predict(net,val)
+p3=predict(net,val[,-1])
 
 p3=ifelse(p3>0.5,1,0)
 
 confusionMatrix(as.factor(p3),as.factor(val[,1]))
+
 
