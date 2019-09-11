@@ -3,13 +3,21 @@ library(zoo)
 library(randomForest)
 library(groupdata2)
 library(e1071)
+library(neuralnet)
 library(caret)
+
+RMSE = function(esperados, observados){
+sqrt(mean((esperados - observados)^2))
+} 
+
 
 normalize <- function(x) { 
   return((x - min(x)) / (max(x) - min(x)))
 }
 
+
 df=read.csv('carbon_3.csv')
+
 
 df <- select (df,-starts_with("date"))%>%
   select(-starts_with("date."))%>%
@@ -67,9 +75,20 @@ val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
 
 rF <- randomForest (as.factor(train$output)~., data=train, scale=T)
 svm <- svm (as.factor(train$output)~., data=train, scale=T,type="C-Classification")
-            
+
 p <- predict(svm, as.factor(val))
 p2 <- predict(rF, as.factor(val))
 
 confusionMatrix(p,as.factor(val[,1]))
 confusionMatrix(p2,as.factor(val[,1]))
+
+
+
+net=neuralnet(train[,1]~., data=train, linear.output=F)
+
+p3=predict(net,val)
+
+p3=ifelse(p3>0.5,1,0)
+
+confusionMatrix(as.factor(p3),as.factor(val[,1]))
+
