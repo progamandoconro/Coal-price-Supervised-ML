@@ -9,6 +9,7 @@ sqrt(mean((esperados - observados)^2))
 
 df=read.csv('carbon_3.csv')
 
+
 df <- select (df,-starts_with("date"))%>%
   select(-starts_with("date."))%>%
   na.aggregate(by='Anio')%>%
@@ -19,6 +20,9 @@ df <- select (df,-starts_with("date"))%>%
 df$cat= paste(df[,1], df[,2])
 df$cat=as.factor(df$cat)
 levels(df$cat) <- 1:118
+df$cat <- as.numeric(df$cat)
+
+
 
 df <- balance(df,size='max', cat_col='cat')
 
@@ -27,7 +31,7 @@ table(df[,1],df[,2])
 m=1
 n=28*m
 
-input<- df[1:(nrow(df)-n),-47]
+input<- df[1:(nrow(df)-n),]
 
 output<-df$DLI_PESO_A_PAGAR[(n+1):nrow(df)]
 
@@ -53,6 +57,10 @@ RMSE(p,val[,12])
 plot(p,val[,12])
 
 p <- predict(rF, test)
-plot(test[,12])
+
+plot(test[,12],xlab='Registros diarios más recientes',ylab='Peso a pagar ($COL)',ylim=c(16,30))
 lines(test[,12])
 lines(p,col=2)
+points(p,col=2)
+
+
