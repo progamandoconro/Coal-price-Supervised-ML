@@ -11,6 +11,7 @@ df=read.csv('carbon_3.csv')
 #Debido a la presencia de variables redundante y en formato inadecuado, además de la presencia de valores faltantes, eliminamos variables en formato de fecha y utilizamos la función na.aggregate para generar data que reemplace los valores ausentes. Para especificaciones de como funciona esta función, podemos utilizar help(na.aggregate). 
  
 library(zoo)
+library(dplyr)
 
 df <- select (df,-starts_with("date"))%>%
   select(-starts_with("date."))%>%
@@ -40,7 +41,7 @@ df <- balance(df,size='max', cat_col='cat')%>%
         lapply(normalize)%>%
         as.data.frame()
 
-Podemos cerciorar que ahora el número de días en cada mes es homogeneo y hemos balanceado la data. 
+#Podemos cerciorar que ahora el número de días en cada mes es homogeneo y hemos balanceado la data. 
 
 table(df[,1],df[,2])
 
@@ -62,7 +63,7 @@ output.1<- vector()
  
 for (i in 1:NROW(df_cruz.1[,1])) {
 
-output[i]<-ifelse( df_cruz.1[i,1]<df_cruz.1[i+n,1],1,0 )
+output.1[i]<-ifelse( df_cruz.1[i,1]<df_cruz.1[i+n,1],1,0 )
 
  }
 
@@ -70,23 +71,23 @@ output.2<- vector()
  
 for (i in 1:NROW(df_cruz.2[,1])) {
 
-output[i]<-ifelse( df_cruz.2[i,1]<df_cruz.2[i+n,1],1,0 )
+output.2[i]<-ifelse( df_cruz.2[i,1]<df_cruz.2[i+n,1],1,0 )
 
  }
 
 #En este punto vamos a reservar una data de evaluación, la cual corresponde a los últimos 10 meses de registro. De esta forma, evaluaremos nuestras predicciones simulando que no teniamos estos datos. En otras palabras, crearemos un modelo sin los datos de los últimos 10 meses para que el error final del algoritmo se base en las predicciones de tales meses. Adicionalmente, aleatorizaremos la data y reserveramos un 30% de datos para la validación del modelo. La sección de validación servirá para afinar las predicciones, ajustando los parámetros de los modelos, así como el ensamble o agrupación de los mismos. 
 
 
-test= df_cruz[(nrow(df_cruz)-280):(nrow(df_cruz)),]
+test.1= df_cruz.1[(nrow(df_cruz.1)-280):(nrow(df_cruz.1)),]
 
-df_cruz <- df_cruz[1:(nrow(df_cruz)-280),]
+df_cruz.1 <- df_cruz.1[1:(nrow(df_cruz.1)-280),]
 set.seed(777)
 
-index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+index <- sample(1:nrow(df_cruz.1),nrow(df_cruz.1))
 
-train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+train.1 <- df_cruz.1[1:floor(nrow(df_cruz.1)*0.7),]
 
-val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+val.1 <- df_cruz.1[(floor(nrow(df_cruz.1)*0.7)+1):nrow(df_cruz.1),]
 
 
 #Ya podemos crear nuestros primeros modelos y evaluar sus resultados sobre la data de validación. 
@@ -101,7 +102,7 @@ confusionMatrix(p,as.factor(val[,1]))
 
 set.seed(777)
 library (randomForest)
-rF <- randomForest (as.factor(train$output)~., ntree=500 ,data=train[,-1], scale=T)
+rF <- randomForest (as.factor(train.1$output.1)~., ntree=500 ,data=train.1[,-1], scale=T)
 p2 <- predict(rF, val[,-1])
 confusionMatrix(p2,as.factor(val[,1]))
 
@@ -116,13 +117,22 @@ confusionMatrix(as.factor(p3),as.factor(val[,1]))
 
 #Entre Support Vector Machine, Redes Neuronales Artificiales y Random Forest, el últimos se queda con los mejores resultados. Tratemos de mejorar tales resultados ajustando número de árboles a utilizar con el algoritmo random forest. 
 
-# Con un loop podemos evaluar el efecto del parámetro "número de árboles aleatoreos" que utiliza el modelo.  
+
+rF <- randomForest (as.factor(train.1$output.1)~., ntree=600 ,data=train.1[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+confusionMatrix(p2,as.factor(val[,1]))
+
+
+rF <- randomForest (as.factor(train$output.1)~., ntree=1000 ,data=train[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+confusionMatrix(p2,as.factor(val[,1]))
+
 
 
 c=vector() ; w=vector()
 for (i in c(1:1000)){
 set.seed(i)
-rF <- randomForest (as.factor(train$output)~., ntree=i ,data=train[,-1], scale=T)
+rF <- randomForest (as.factor(train$output.1)~., ntree=i ,data=train[,-1], scale=T)
 p2 <- predict(rF, val[,-1])
 l=confusionMatrix(p2,as.factor(val[,1]))
 c[i]= l$overall[1]
@@ -131,7 +141,14 @@ w[i]=which.max(c)
 
 
 
+c=vector() ; w=vector()
+for (i in c(1:1000)){
+for (e in 1:ncol(train)) {
 
-
-
-
+set.seed(777)
+rF <- randomForest (as.factor(train.1$output.1)~., ntree=i , mtry=e, data=train.1[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+l=confusionMatrix(p2,as.factor(val[,1]))
+c[i]= l$overall[1]
+w[e]=which.max(c)
+}}
