@@ -79,15 +79,31 @@ svm <- svm (as.factor(train$output)~., data=train[,-1], scale=T)
 p <- predict(svm, val[,-1])
 p2 <- predict(rF, val[,-1])
 
-confusionMatrix(p,as.factor(val[,1]))
-confusionMatrix(p2,as.factor(val[,1]))
-
-net=neuralnet(train$output~., data=train[,-1], hidden=ncol(train)-1,linear.output=F,stepmax=10e06)
-
-p3=predict(net,val[,-1])
-
-p3=ifelse(p3>0.5,1,0)
-
-confusionMatrix(as.factor(p3),as.factor(val[,1]))
 
 
+
+c=vector() 
+for (i in c(1:1000)){
+set.seed(i)
+rF <- randomForest (as.factor(train$output)~., ntree=i ,data=train[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+l=confusionMatrix(p2,as.factor(val[,1]))
+c[i]= l$overall[1]
+}
+
+
+
+
+
+c=vector() ; t=vector()
+for (i in c(1:1000)){
+for (e in c(sqrt(20),sqrt(30),sqrt(40),sqrt(ncol(train)),sqrt(100), sqrt(200))){ 
+set.seed(777)
+rF <- randomForest (as.factor(train$output)~., ntree=i ,mtry=e, data=train[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+l=confusionMatrix(p2,as.factor(val[,1]))
+c[i]= l$overall[1]
+t[e]=l$overall[1]
+
+}
+}
