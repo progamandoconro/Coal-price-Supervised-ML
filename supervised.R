@@ -121,5 +121,14 @@ for (i in 1:NROW(df_cruz[,1])) {
 output[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
 
  }
+ }
 
 rF <- randomForest (as.factor(train$output)~.,ntree=533, mtry=sqrt(200) ,data=train[,-1], scale=T)
+p2 <- predict(rF, val[,-1])
+confusionMatrix(p2,as.factor(val[,1]))
+
+
+
+
+
+
