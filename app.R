@@ -38,7 +38,7 @@ numericInput("p2","mtry",200),
 h5("*El valor de mtry es llevado a su raíz cuadrada"),
 numericInput("p3","seed",777),
 h5("Predicciones"),
-sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9),
+sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.5),
 sliderInput("p5","Número de meses a futuro",min=1,max=12,value=c(1,1))
 
 ),
