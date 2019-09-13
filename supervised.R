@@ -60,11 +60,11 @@ df_cruz$output<- output
 
 df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
 
-#test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
+test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
 
 ###################################################
 
-#df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
 set.seed(777)
 
 index <- sample(1:nrow(df_cruz),nrow(df_cruz))
@@ -79,21 +79,16 @@ svm <- svm (as.factor(train$output)~., data=train[,-1], scale=T)
 p <- predict(svm, val[,-1])
 p2 <- predict(rF, val[,-1])
 
-
-
-
 c=vector() 
 for (i in c(1:1000)){
-set.seed(i)
-rF <- randomForest (as.factor(train$output)~., ntree=i ,data=train[,-1], scale=T)
+set.seed(777)
+rF <- randomForest (as.factor(train$output)~.,ntree=533, mtry=i ,data=train[,-1], scale=T)
 p2 <- predict(rF, val[,-1])
 l=confusionMatrix(p2,as.factor(val[,1]))
 c[i]= l$overall[1]
 }
 
-
-
-
+rF <- randomForest (as.factor(train$output)~.,ntree=1000,mtry=47,data=train[,-1], scale=T)
 
 c=vector() ; t=vector()
 for (i in c(1:1000)){
@@ -107,3 +102,24 @@ t[e]=l$overall[1]
 
 }
 }
+
+for (e in 1:12){
+
+m=e
+n=28*m
+
+input<- df
+
+output<-df$DLI_PESO_A_PAGAR
+
+df_cruz <- data.frame(output,input)
+
+output<- vector()
+ 
+for (i in 1:NROW(df_cruz[,1])) {
+ 
+output[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+
+ }
+
+rF <- randomForest (as.factor(train$output)~.,ntree=533, mtry=sqrt(200) ,data=train[,-1], scale=T)
