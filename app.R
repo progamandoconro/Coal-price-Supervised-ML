@@ -47,7 +47,7 @@ tabPanel('Evaluación'),tabPanel('Predicciones')
 
 ))))
 
-server <- function(input, output) {
+server <- function(input, outputshiny) {
 
 
 m=1
