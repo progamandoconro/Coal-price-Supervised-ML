@@ -39,11 +39,12 @@ h5("*El valor de mtry es llevado a su raíz cuadrada"),
 numericInput("p3","seed",777),
 h5("Predicciones"),
 sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.5),
-sliderInput("p5","Número de meses a futuro",min=1,max=12,value=c(1,1))
+sliderInput("p5","Número de meses a futuro",min=1,max=12,value=1)
 
 ),
   dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',h5('hello'),
-plotOutput('distPlot')
+plotOutput('distPlot'),
+h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
 ),
 tabPanel('Evaluación'),tabPanel('Predicciones')
 
@@ -52,7 +53,7 @@ tabPanel('Evaluación'),tabPanel('Predicciones')
 server <- function(input, output) {
 output$distPlot <- renderPlot({
 
-m=1
+m=input$p5
 
 n=28*m
 
@@ -85,15 +86,32 @@ train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
 
 val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
 
-rF <- randomForest (as.factor(train$target)~.,ntree=533, mtry=sqrt(200) ,data=train[,-1], scale=T, importance=T,replace=T)
+rF <- randomForest (as.factor(train$target)~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
 
 p2 <- predict(rF, val[,-1])
-l <- confusionMatrix(p2,as.factor(val[,1]))
+cM <- confusionMatrix(p2,as.factor(val[,1]))
+
+l<- as.data.frame(cM[2])
+
+l<-l[3]
+l<-as.vector(l)
+l<-c(l)
+
+
+ctable <- as.table(matrix(as.vector(unlist(l)), nrow = 2, byrow = TRUE))
+fourfoldplot(ctable, color = c( "#CC6666","#99CC99"),
+             conf.level = 0, margin = 2,main="Matríz de Validación (Verde para éxito en la predicción, rojo para predicción errada)") + 
+    text(-0.4,0.4, "VN", cex=1) + 
+    text(0.4, -0.4, "VP", cex=1) + 
+    text(0.4,0.4, "FN", cex=1) + 
+    text(-0.4, -0.4, "FP", cex=1)
+
 
 })
 }
 
 shinyApp(ui, server)
+
 
 
 
