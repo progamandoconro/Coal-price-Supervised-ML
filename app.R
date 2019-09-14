@@ -42,7 +42,7 @@ sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.5),
 sliderInput("p5","Número de meses a futuro",min=1,max=12,value=1)
 
 ),
-  dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',h5('hello'),
+  dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',h5('Predicciones del algoritmo Random Forest para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
 plotOutput('distPlot'),
 h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
 ),
@@ -111,11 +111,4 @@ fourfoldplot(ctable, color = c( "#CC6666","#99CC99"),
 }
 
 shinyApp(ui, server)
-
-
-
-
-
-
-
 
