@@ -6,6 +6,7 @@ library(zoo)
 library(dplyr)
 library(groupdata2)
 library(ggplot2)
+library(DT)
 
 normalize <- function(x) { 
     return((x - min(x)) / (max(x) - min(x)))
@@ -50,7 +51,7 @@ ui <- dashboardPage(
     ),
     tabPanel('Evaluación',
              h5('Resultados de las predicciones para los últimos 10 meses registrados (desconocidos para el algoritmo)'),
-             textOutput("table")
+             DT::dataTableOutput("mytable")  
              ),tabPanel('Predicciones')
     
     ))))
@@ -115,7 +116,7 @@ server <- function(input, output) {
     })
     
     
-    output$table <- renderText({
+    output$mytable = DT::renderDataTable({
         
         m=input$p5
         
@@ -154,15 +155,10 @@ server <- function(input, output) {
         
         p2 <- predict(rF, test[,-1])
 
-        confusionMatrix(p2,as.factor(test[,1]))
+        cM=confusionMatrix(p2,as.factor(test[,1]))
+        as.data.frame(unlist(cM))
         
     })
-    
-    
-    
-    
-    
-    
     
     
 }
