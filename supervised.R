@@ -1,30 +1,25 @@
-library(dplyr)
-library(zoo)
+library(shiny)
+library(shinydashboard)
 library(randomForest)
-library(groupdata2)
-library(e1071)
-library(neuralnet)
 library(caret)
-
-RMSE = function(esperados, observados){
-sqrt(mean((esperados - observados)^2))
-} 
-
+library(zoo)
+library(dplyr)
+library(groupdata2)
+library(ggplot2)
+library(DT)
 
 normalize <- function(x) { 
-  return((x - min(x)) / (max(x) - min(x)))
+    return((x - min(x)) / (max(x) - min(x)))
 }
 
-
-df=read.csv('carbon_3.csv')
-
+df=read.csv('~/dockspace/carbon_3.csv')
 
 df <- select (df,-starts_with("date"))%>%
-  select(-starts_with("date."))%>%
-  na.aggregate(by='Anio')%>%
-  na.aggregate(by='Mes')%>%
-  na.aggregate(by='Dia')%>%
-  na.aggregate()
+    select(-starts_with("date."))%>%
+    na.aggregate(by='Anio')%>%
+    na.aggregate(by='Mes')%>%
+    na.aggregate(by='Dia')%>%
+    na.aggregate()
 
 df$cat= paste(df[,1], df[,2])
 df$cat=as.factor(df$cat)
@@ -32,103 +27,203 @@ levels(df$cat) <- 1:118
 df$cat <- as.numeric(df$cat)
 
 df <- balance(df,size='max', cat_col='cat')%>%
-	lapply(normalize)%>%
-	as.data.frame()
+    lapply(normalize)%>%
+    as.data.frame()
 
 
-table(df[,1],df[,2])
+ui <- dashboardPage(
+    dashboardHeader(title="Predicción Carbón"),
+    dashboardSidebar(
+                     selectInput("target","Variable a predecir",c("DLI_PESO_A_PAGAR.x","DLI_VALOR_TOTAL.x")),
+                     h5("Parámetros de afinación del Algoritmo"),
+                     numericInput("p1","ntree",534),
+                     numericInput("p2","mtry",sqrt(200)),
+                     h5("*El valor de mtry es llevado a su raíz cuadrada"),
+                     numericInput("p3","seed",777),
+                     h5("Predicciones"),
+                     sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.499),
+                     sliderInput("p5","Número de meses a futuro",min=1,max=12,value=1)
+                     
+    ),
+    dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',
+                                                      h5('Predicciones para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
+                                                      h5("Matríz de Validación (Verde = éxito en la predicción, rojo = falla en la predicción)"),
+                                                      plotOutput('plot'),
+                                                      h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
+    ),
+    tabPanel('Evaluación',
+             h5('Resultados de las predicciones para los últimos 10 meses registrados (desconocidos para el algoritmo)'),
+             DT::dataTableOutput("table")  
+             ),
+    
+    tabPanel('Predicciones',
+             h5("El algoritmo Random Forest, con los parámeros afinados, arroja que: "),
+             textOutput("results"))
+    
+    ))))
 
-##################################################
-m=1
-n=28*m
+server <- function(input, output) {
+    output$plot <- renderPlot({
+        
+        m=input$p5
+        
+        n=28*m
+        
+        var_expl<- df
+        
+        target<-df[,input$target]
+        
+        df_cruz <- data.frame(target,var_expl)
+        
+        target<- vector()
+        
+        for (i in 1:NROW(df_cruz[,1])) {
+            
+            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+            
+        }
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
+        
+        df_cruz$target<- target
+        
+        df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
+        
+        test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
+        
+        df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+        set.seed(input$p3)
+        
+        index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+        
+        train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+        
+        val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+        
+        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        
+        p2 <- predict(rF, val[,-1])
+        p2<- ifelse(p2<input$p4,0,1)
+        cM <- confusionMatrix(as.factor(p2),as.factor(val[,1]))
+        
+        l<- as.data.frame(cM[2])
+        
+        l<-l[3]
+        l<-as.vector(l)
+        l<-c(l)
+        
+        ctable <- as.table(matrix(as.vector(unlist(l)), nrow = 2, byrow = TRUE))
+        fourfoldplot(ctable, color = c( "#CC6666","#99CC99"),
+                     conf.level = 0, margin = 2,main="") + 
+            text(-0.4,0.4, "VN", cex=1) + 
+            text(0.4, -0.4, "VP", cex=1) + 
+            text(0.4,0.4, "FN", cex=1) + 
+            text(-0.4, -0.4, "FP", cex=1)
+        
+        
+    })
+    
+    
+    output$table = DT::renderDataTable({
+        
+        m=input$p5
+        
+        n=28*m
+        
+        var_expl<- df
+        
+        target<-df[,input$target]
+        
+        df_cruz <- data.frame(target,var_expl)
+        
+        target<- vector()
+        
+        for (i in 1:NROW(df_cruz[,1])) {
+            
+            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+            
+        }
+        
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
+        
+        df_cruz$target<- target
+        
+        df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
+        
+        test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
+        
+        df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+        set.seed(input$p3)
+        
+        index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+        
+        train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+        
+        val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+        
+        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        
+        
+        p2 <- predict(rF, test[,-1])
+        p2<- ifelse(p2<input$p4,0,1)
 
-input<- df
-
-output<-df$DLI_PESO_A_PAGAR
-
-df_cruz <- data.frame(output,input)
-
-output<- vector()
- 
-for (i in 1:NROW(df_cruz[,1])) {
- 
-output[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
-
- }
-
-df_cruz$output<- output
-
-df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
-
-test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
-
-###################################################
-
-df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
-set.seed(777)
-
-index <- sample(1:nrow(df_cruz),nrow(df_cruz))
-
-train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
-
-val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
-
-rF <- randomForest (as.factor(train$output)~., data=train[,-1], scale=T)
-svm <- svm (as.factor(train$output)~., data=train[,-1], scale=T)
-
-p <- predict(svm, val[,-1])
-p2 <- predict(rF, val[,-1])
-
-c=vector() 
-for (i in c(1:1000)){
-set.seed(777)
-rF <- randomForest (as.factor(train$output)~.,ntree=533, mtry=i ,data=train[,-1], scale=T)
-p2 <- predict(rF, val[,-1])
-l=confusionMatrix(p2,as.factor(val[,1]))
-c[i]= l$overall[1]
+        cM=confusionMatrix(as.factor(p2),as.factor(test[,1]))
+        as.data.frame(unlist(cM))
+        
+    })
+    
+    output$results = renderText({
+        
+        m=input$p5
+        
+        n=28*m
+        
+        var_expl<- df
+        
+        target<-df[,input$target]
+        
+        df_cruz <- data.frame(target,var_expl)
+        
+        target<- vector()
+        
+        for (i in 1:NROW(df_cruz[,1])) {
+            
+            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+            
+        }
+        
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
+        
+        df_cruz$target<- target
+        
+        df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
+        
+        
+        df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+        set.seed(input$p3)
+        
+        index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+        
+        train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+        
+        val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+        
+        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        
+        p2 <- predict(rF, df_fut[,-1])
+        
+      as.numeric(as.vector(p2))
+        
+    })
+    
+    
+    
+    
 }
 
-rF <- randomForest (as.factor(train$output)~.,ntree=1000,mtry=47,data=train[,-1], scale=T)
-
-c=vector() ; t=vector()
-for (i in c(1:1000)){
-for (e in c(sqrt(20),sqrt(30),sqrt(40),sqrt(ncol(train)),sqrt(100), sqrt(200))){ 
-set.seed(777)
-rF <- randomForest (as.factor(train$output)~., ntree=i ,mtry=e, data=train[,-1], scale=T)
-p2 <- predict(rF, val[,-1])
-l=confusionMatrix(p2,as.factor(val[,1]))
-c[i]= l$overall[1]
-t[e]=l$overall[1]
-
-}
-}
-
-for (e in 1:12){
-
-m=e
-n=28*m
-
-input<- df
-
-output<-df$DLI_PESO_A_PAGAR
-
-df_cruz <- data.frame(output,input)
-
-output<- vector()
- 
-for (i in 1:NROW(df_cruz[,1])) {
- 
-output[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
-
- }
- }
-
-rF <- randomForest (as.factor(train$output)~.,ntree=533, mtry=sqrt(200) ,data=train[,-1], scale=T)
-p2 <- predict(rF, val[,-1])
-confusionMatrix(p2,as.factor(val[,1]))
-
-
-
+shinyApp(ui, server)
 
 
 
