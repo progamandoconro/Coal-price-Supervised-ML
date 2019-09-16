@@ -120,7 +120,6 @@ server <- function(input, output) {
             text(0.4,0.4, "FN", cex=1) + 
             text(-0.4, -0.4, "FP", cex=1)
         
-        
     })
     
     
@@ -214,16 +213,12 @@ server <- function(input, output) {
         
         p2 <- predict(rF, df_fut[,-1])
         
-      as.numeric(as.vector(p2))
+ paste("La probabilidad de aumento de", input$target,"es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
         
     })
-    
-    
     
     
 }
 
 shinyApp(ui, server)
-
-
 
