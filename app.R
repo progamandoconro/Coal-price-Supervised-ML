@@ -53,8 +53,12 @@ ui <- dashboardPage(
     ),
     tabPanel('Evaluación',
              h5('Resultados de las predicciones para los últimos 10 meses registrados (desconocidos para el algoritmo)'),
-             DT::dataTableOutput("mytable")  
-             ),tabPanel('Predicciones')
+             DT::dataTableOutput("table")  
+             ),
+    
+    tabPanel('Predicciones',
+             h5("El algoritmo Random Forest, con los parámeros afinados, arroja que: "),
+             textOutput("results"))
     
     ))))
 
@@ -79,7 +83,7 @@ server <- function(input, output) {
             
         }
         
-        df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
+        df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
         
         df_cruz$target<- target
         
@@ -115,9 +119,58 @@ server <- function(input, output) {
             text(0.4,0.4, "FN", cex=1) + 
             text(-0.4, -0.4, "FP", cex=1)
         
-    })
         
-    output$mytable = DT::renderDataTable({
+    })
+    
+    
+    output$table = DT::renderDataTable({
+        
+        m=input$p5
+        
+        n=28*m
+        
+        var_expl<- df
+        
+        target<-df[,input$target]
+        
+        df_cruz <- data.frame(target,var_expl)
+        
+        target<- vector()
+        
+        for (i in 1:NROW(df_cruz[,1])) {
+            
+            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+            
+        }
+        
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
+        
+        df_cruz$target<- target
+        
+        df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
+        
+        test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
+        
+        df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+        set.seed(input$p3)
+        
+        index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+        
+        train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+        
+        val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
+        
+        rF <- randomForest (as.factor(train$target)~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        
+        p2 <- predict(rF, test[,-1])
+
+        cM=confusionMatrix(p2,as.factor(test[,1]))
+        as.data.frame(unlist(cM))
+        
+    })
+    
+    output$results = renderText({
         
         m=input$p5
         
@@ -144,7 +197,6 @@ server <- function(input, output) {
         
         df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
         
-        test= df_cruz[(nrow(df_cruz)-220):(nrow(df_cruz)),]
         
         df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
         set.seed(input$p3)
@@ -157,12 +209,12 @@ server <- function(input, output) {
         
         rF <- randomForest (as.factor(train$target)~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
         
-        p2 <- predict(rF, test[,-1])
-
-        cM=confusionMatrix(p2,as.factor(test[,1]))
-        as.data.frame(unlist(cM))
+        p2 <- predict(rF, df_fut[,-1])
+        
+      as.numeric(as.vector(p2))
         
     })
+    
     
 }
 
