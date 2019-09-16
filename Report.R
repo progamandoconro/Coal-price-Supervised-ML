@@ -1,3 +1,6 @@
+rsconnect::setAccountInfo(name='omgonzalez',
+			  token='EE20E5653E9A14FA831E3201D17A3438',
+			  secret='/5EwCcmRsWrAdNDPKEdZJ8cNvFX+GhHlGUwkH+zl')
 
 #El objetivo de este estudio es la predicción del valor y el peso del Carbón en Termopaipa para los 12 meses futuros. 
 #Se intentaron varios algoritmos de aprendizaje automatizado, o Machine Learning (ML) en inglés. Primero se utilizaron los valores numéricos en su naturaleza original, es decir, valores contínuos, variando entre 20 y 40 millones de pesos colombianos y 20 y 40 toneladas. 
