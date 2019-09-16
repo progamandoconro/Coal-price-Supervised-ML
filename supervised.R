@@ -30,7 +30,6 @@ df <- balance(df,size='max', cat_col='cat')%>%
     lapply(normalize)%>%
     as.data.frame()
 
-
 ui <- dashboardPage(
     dashboardHeader(title="Predicción Carbón"),
     dashboardSidebar(
@@ -121,8 +120,7 @@ server <- function(input, output) {
             text(-0.4, -0.4, "FP", cex=1)
         
     })
-    
-    
+
     output$table = DT::renderDataTable({
         
         m=input$p5
@@ -142,8 +140,7 @@ server <- function(input, output) {
             target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
             
         }
-        
-        
+       
         df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
         
         df_cruz$target<- target
@@ -162,8 +159,7 @@ server <- function(input, output) {
         val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
         
         rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
-        
-        
+       
         p2 <- predict(rF, test[,-1])
         p2<- ifelse(p2<input$p4,0,1)
 
@@ -192,7 +188,6 @@ server <- function(input, output) {
             
         }
         
-        
         df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
         
         df_cruz$target<- target
@@ -212,13 +207,13 @@ server <- function(input, output) {
         rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
         
         p2 <- predict(rF, df_fut[,-1])
+        p2<- ifelse(p2<input$p4,0,1)
         
- paste("La probabilidad de aumento de", input$target,"es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
+ paste("La probabilidad de aumento de", input$target,"es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )," +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
         
     })
-    
     
 }
 
 shinyApp(ui, server)
-
+   
