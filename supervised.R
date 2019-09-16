@@ -14,6 +14,11 @@ normalize <- function(x) {
 
 df=read.csv('~/dockspace/carbon_3.csv')
 
+df$Toneladas_diarias<- df[,11]
+df$Valor_diario_a_pagar<- df[,13]
+
+df<-df[,c(-11,-13)]
+
 df <- select (df,-starts_with("date"))%>%
     select(-starts_with("date."))%>%
     na.aggregate(by='Anio')%>%
@@ -33,16 +38,16 @@ df <- balance(df,size='max', cat_col='cat')%>%
 ui <- dashboardPage(
     dashboardHeader(title="Predicción Carbón"),
     dashboardSidebar(
-                     selectInput("target","Variable a predecir",c("DLI_PESO_A_PAGAR.x","DLI_VALOR_TOTAL.x")),
-                     h5("Parámetros de afinación del Algoritmo"),
-                     numericInput("p1","ntree",534),
-                     numericInput("p2","mtry",sqrt(200)),
-                     h5("*El valor de mtry es llevado a su raíz cuadrada"),
-                     numericInput("p3","seed",777),
-                     h5("Predicciones"),
-                     sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.499),
-                     sliderInput("p5","Número de meses a futuro",min=1,max=12,value=1)
-                     
+        selectInput("target","Variable a predecir",c("Toneladas_diarias","Valor_diario_a_pagar")),
+        h5("Parámetros de afinación del Algoritmo"),
+        numericInput("p1","ntree",534),
+        numericInput("p2","mtry",sqrt(200)),
+        h5("*El valor de mtry es llevado a su raíz cuadrada"),
+        numericInput("p3","seed",777),
+        h5("Predicciones"),
+        sliderInput("p4","Ajuste de probabilidad de clases",min=0.1,max=0.9,value=0.499),
+        sliderInput("p5","Número de meses a futuro",min=1,max=12,value=1)
+        
     ),
     dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',
                                                       h5('Predicciones para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
@@ -53,7 +58,7 @@ ui <- dashboardPage(
     tabPanel('Evaluación',
              h5('Resultados de las predicciones para los últimos 10 meses registrados (desconocidos para el algoritmo)'),
              DT::dataTableOutput("table")  
-             ),
+    ),
     
     tabPanel('Predicciones',
              h5("El algoritmo Random Forest, con los parámeros afinados, arroja que: "),
@@ -120,7 +125,7 @@ server <- function(input, output) {
             text(-0.4, -0.4, "FP", cex=1)
         
     })
-
+    
     output$table = DT::renderDataTable({
         
         m=input$p5
@@ -140,7 +145,7 @@ server <- function(input, output) {
             target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
             
         }
-       
+        
         df_fut <-df_cruz[(nrow(df_cruz)-(n-1)):nrow(df_cruz),]
         
         df_cruz$target<- target
@@ -159,10 +164,10 @@ server <- function(input, output) {
         val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
         
         rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
-       
+        
         p2 <- predict(rF, test[,-1])
         p2<- ifelse(p2<input$p4,0,1)
-
+        
         cM=confusionMatrix(as.factor(p2),as.factor(test[,1]))
         as.data.frame(unlist(cM))
         
@@ -209,11 +214,10 @@ server <- function(input, output) {
         p2 <- predict(rF, df_fut[,-1])
         p2<- ifelse(p2<input$p4,0,1)
         
- paste("La probabilidad de aumento de", input$target,"es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )," +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
+        paste("La probabilidad de aumento de", input$target,"dentro de", input$p5, "mes es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )," +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
         
     })
     
 }
 
 shinyApp(ui, server)
-   
