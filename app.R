@@ -33,7 +33,9 @@ df <- balance(df,size='max', cat_col='cat')%>%
 
 ui <- dashboardPage(
     dashboardHeader(title="Predicción Carbón"),
-    dashboardSidebar(h5("Parámetros de afinación del Algoritmo Random Forest"),
+    dashboardSidebar(
+                     selectInput("target","Variable a predecir",c("DLI_PESO_A_PAGAR.x","DLI_VALOR_TOTAL.x")),
+                     h5("Parámetros de afinación del Algoritmo"),
                      numericInput("p1","ntree",534),
                      numericInput("p2","mtry",sqrt(200)),
                      h5("*El valor de mtry es llevado a su raíz cuadrada"),
@@ -44,8 +46,8 @@ ui <- dashboardPage(
                      
     ),
     dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',
-                                                      h5('Predicciones del algoritmo Random Forest para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
-                                                      h5("Matríz de Validación (Verde = éxito en la predicción, rojo = fracaso en la predicción)"),
+                                                      h5('Predicciones para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
+                                                      h5("Matríz de Validación (Verde = éxito en la predicción, rojo = falla en la predicción)"),
                                                       plotOutput('plot'),
                                                       h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
     ),
@@ -65,7 +67,7 @@ server <- function(input, output) {
         
         var_expl<- df
         
-        target<-df$DLI_PESO_A_PAGAR
+        target<-df[,input$target]
         
         df_cruz <- data.frame(target,var_expl)
         
@@ -76,6 +78,8 @@ server <- function(input, output) {
             target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
             
         }
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
         
         df_cruz$target<- target
         
@@ -103,7 +107,6 @@ server <- function(input, output) {
         l<-as.vector(l)
         l<-c(l)
         
-        
         ctable <- as.table(matrix(as.vector(unlist(l)), nrow = 2, byrow = TRUE))
         fourfoldplot(ctable, color = c( "#CC6666","#99CC99"),
                      conf.level = 0, margin = 2,main="") + 
@@ -112,10 +115,8 @@ server <- function(input, output) {
             text(0.4,0.4, "FN", cex=1) + 
             text(-0.4, -0.4, "FP", cex=1)
         
-        
     })
-    
-    
+        
     output$mytable = DT::renderDataTable({
         
         m=input$p5
@@ -124,7 +125,7 @@ server <- function(input, output) {
         
         var_expl<- df
         
-        target<-df$DLI_PESO_A_PAGAR
+        target<-df[,input$target]
         
         df_cruz <- data.frame(target,var_expl)
         
@@ -135,6 +136,9 @@ server <- function(input, output) {
             target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
             
         }
+        
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
         
         df_cruz$target<- target
         
@@ -159,7 +163,6 @@ server <- function(input, output) {
         as.data.frame(unlist(cM))
         
     })
-    
     
 }
 
