@@ -62,7 +62,9 @@ ui <- dashboardPage(
     
     tabPanel('Predicciones',
              h5("El algoritmo Random Forest, con los parámeros afinados, arroja que: "),
-             textOutput("results"))
+             textOutput("results"),
+             plotOutput('plot2')
+             )
     
     ))))
 
@@ -197,6 +199,52 @@ server <- function(input, output) {
         paste("La probabilidad de aumento de", input$target,"dentro de", input$p5, "mes es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )," +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
         
     })
+    
+    
+    
+    output$plot2 = renderPlot({
+        
+        m=input$p5
+        n=28*m
+        var_expl<- df
+        
+        target<-df[,input$target]
+        df_cruz <- data.frame(target,var_expl)
+        
+        target<- vector()
+        for (i in 1:NROW(df_cruz[,1])) {
+            
+            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+            
+        }
+        
+        df_fut <-df_cruz[(nrow(df_cruz)-n):nrow(df_cruz),]
+        df_cruz$target<- target
+        df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
+        df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
+        
+        set.seed(input$p3)
+        index <- sample(1:nrow(df_cruz),nrow(df_cruz))
+        train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
+        
+        set.seed(input$p3)
+        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        
+        p2 <- predict(rF, df_fut[,-1])
+        p2<- ifelse(p2<input$p4,0,1)
+        p <- as.vector(as.numeric(p2))
+        g<-ggplot(data = as.data.frame(p),aes(x=1:NROW(p),y=p))
+        
+        g+geom_line()+geom_point()+xlab("Días de transacciones (28 días / mes)") + ylab(paste("Valor escalado del",input$target))+
+            geom_line(aes(col="Predicciones"))+geom_point()+
+            geom_line(aes(y=df_fut[,input$target]))+geom_point(aes(y=df_fut[,input$target]))
+        
+        
+        
+    })
+    
+    
+    
     
 }
 
