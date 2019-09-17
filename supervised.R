@@ -7,6 +7,7 @@ library(dplyr)
 library(groupdata2)
 library(ggplot2)
 library(DT)
+library(e1071)
 
 normalize <- function(x) { 
     return((x - min(x)) / (max(x) - min(x)))
