@@ -1,25 +1,40 @@
+# Librerias
 library(shiny)
+# Estilo para el aplicativo Shiny
 library(shinydashboard)
+# Cargar las funciones que permiten usar el algoritmo
 library(randomForest)
+# Usada para la validacion del algoritmo
 library(caret)
+# Transormaciones de los datos. Nos ayuda a darle valores a los datos que nos faltaban.
 library(zoo)
 library(dplyr)
+# Usada para la mineria. Homognizar las muestras de datos
 library(groupdata2)
+# Graficas
 library(ggplot2)
+# Tablas tablas Shiny
 library(DT)
+# Algoritmo 
 library(e1071)
 
+# escalar todos los datos entre 0 y 1
 normalize <- function(x) { 
     return((x - min(x)) / (max(x) - min(x)))
 }
 
+# Leer los datos
 df=read.csv('carbon_3.csv')
 
+# Definir las variables respuesta
 df$Toneladas_diarias<- df[,11]
 df$Valor_diario_a_pagar<- df[,13]
 
+# Reemplazar el nombre.
 df<-df[,c(-11,-13)]
 
+# (zoo) Se eliminan las columnas que tengan un formato tipo fecha.
+# Tratamiento de los datos faltantes
 df <- select (df,-starts_with("date"))%>%
     select(-starts_with("date."))%>%
     na.aggregate(by='Anio')%>%
@@ -27,14 +42,19 @@ df <- select (df,-starts_with("date"))%>%
     na.aggregate(by='Dia')%>%
     na.aggregate()
 
+# Crea una columna adicional con las columnas 1 y 2 concatenadas
 df$cat= paste(df[,1], df[,2])
+
 df$cat=as.factor(df$cat)
 levels(df$cat) <- 1:118
 df$cat <- as.numeric(df$cat)
 
+# balance. Homogenizar el numero de dias por mes, cada mes queda con 28 dias todos los años.
 df <- balance(df,size='max', cat_col='cat')%>%
     lapply(normalize)%>%
     as.data.frame()
+
+# aqui quedamos
 
 ui <- dashboardPage(
     dashboardHeader(title="Predicción Carbón"),
