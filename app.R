@@ -53,10 +53,10 @@ ui <- dashboardPage(
         
     ),
     dashboardBody(tabItem('item',tabsetPanel(tabPanel('Validación',
-                                                      h5('Predicciones para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
-                                                      h5("Matríz de Validación (Verde = éxito en la predicción, rojo = falla en la predicción)"),
-                                                      plotOutput('plot'),
-                                                      h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
+                 h5('Predicciones para las subidas y bajadas en el peso del Carbón ingresado y del valor facturado'),
+                 h5("Matríz de Validación (Verde = éxito en la predicción, rojo = falla en la predicción)"),
+                 plotOutput('plot'),
+                 h5('VN = Verdaderos Negativos, FN = Falsos Negativos, FP = Falsos Positivos, VP = Verdaderos Positivos')
     ),
     tabPanel('Evaluación',
              h5('Resultados de las predicciones para los últimos 10 meses registrados (desconocidos para el algoritmo)'),
@@ -97,7 +97,9 @@ server <- function(input, output) {
         val <- df_cruz[(floor(nrow(df_cruz)*0.7)+1):nrow(df_cruz),]
        
         set.seed(input$p3)
-        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        rF <- randomForest (train$target~.,ntree=input$p1, 
+                            mtry=sqrt(input$p2) ,data=train[,-1], 
+                            scale=T, importance=T,replace=T)
         
         p2 <- predict(rF, val[,-1])
         p2<- ifelse(p2<input$p4,0,1)
@@ -124,7 +126,6 @@ server <- function(input, output) {
         m=input$p5
         n=28*m
         var_expl<- df
-        
         target<-df[,input$target]
         df_cruz <- data.frame(target,var_expl)
         
@@ -150,7 +151,9 @@ server <- function(input, output) {
         train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
         
         set.seed(input$p3)
-        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        rF <- randomForest (train$target~.,ntree=input$p1, 
+                            mtry=sqrt(input$p2) ,data=train[,-1],
+                            scale=T, importance=T,replace=T)
         
         p2 <- predict(rF, test[,-1])
         p2<- ifelse(p2<input$p4,0,1)
@@ -165,7 +168,6 @@ server <- function(input, output) {
         m=input$p5
         n=28*m
         var_expl<- df
-
         target<-df[,input$target]
         df_cruz <- data.frame(target,var_expl)
         
@@ -186,12 +188,16 @@ server <- function(input, output) {
         train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
         
         set.seed(input$p3)
-        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        rF <- randomForest (train$target~.,ntree=input$p1, 
+                            mtry=sqrt(input$p2) ,data=train[,-1], 
+                            scale=T, importance=T,replace=T)
         
         p2 <- predict(rF, df_fut[,-1])
         p2<- ifelse(p2<input$p4,0,1)
         
-        paste("La probabilidad de aumento de", input$target,"dentro de", input$p5, "mes es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) )," +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
+        paste("La probabilidad de aumento de", input$target,"dentro de", 
+              input$p5, "mes es de:",   ( sum( as.numeric(as.vector(p2))) / nrow(df_fut) ),
+              " +- ",( sd( as.numeric(as.vector(p2))) / nrow(df_fut) )) 
         
     })
     
@@ -200,7 +206,6 @@ server <- function(input, output) {
         m=input$p5
         n=28*m
         var_expl<- df
-        
         target<-df[,input$target]
         df_cruz <- data.frame(target,var_expl)
         
@@ -221,14 +226,16 @@ server <- function(input, output) {
         train <- df_cruz[1:floor(nrow(df_cruz)*0.7),]
         
         set.seed(input$p3)
-        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,data=train[,-1], scale=T, importance=T,replace=T)
+        rF <- randomForest (train$target~.,ntree=input$p1, mtry=sqrt(input$p2) ,
+                            data=train[,-1], scale=T, importance=T,replace=T)
         
         p2 <- predict(rF, df_fut[,-1])
         p2<- ifelse(p2<input$p4,0,1)
         p <- as.vector(as.numeric(p2))
         g<-ggplot(data = as.data.frame(p),aes(x=1:NROW(p),y=p))
         
-        g+geom_line()+geom_point()+xlab("Días de transacciones (28 días / mes)") + ylab(paste("Valor escalado del",input$target))+
+        g+geom_line()+geom_point()+xlab("Días de transacciones (28 días / mes)") + 
+            ylab(paste("Valor escalado del",input$target))+
             geom_line(aes(col="Predicciones"))+geom_point()+
             geom_line(aes(y=df_fut[,input$target]))+geom_point(aes(y=df_fut[,input$target]))
         
