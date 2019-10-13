@@ -1,3 +1,5 @@
+# Shiny App with Supervised ML for Coal Price Prediction:
+
 library(shiny)
 library(shinydashboard)
 library(randomForest)
@@ -73,15 +75,10 @@ server <- function(input, output) {
     output$plot <- renderPlot({
         
         m=input$p5
-        
         n=28*m
-        
         var_expl<- df
-        
         target<-df[,input$target]
-        
         df_cruz <- data.frame(target,var_expl)
-        
         target<- vector()
         
         for (i in 1:NROW(df_cruz[,1])) {
@@ -91,9 +88,7 @@ server <- function(input, output) {
         }
         
         df_cruz$target<- target
-        
         df_cruz<-df_cruz[1:(nrow(df_cruz)-n),]
-        
         df_cruz <- df_cruz[1:(nrow(df_cruz)-220),]
         
         set.seed(input$p3)
@@ -212,7 +207,7 @@ server <- function(input, output) {
         target<- vector()
         for (i in 1:NROW(df_cruz[,1])) {
             
-            target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
+        target[i]<-ifelse( df_cruz[i,1]<df_cruz[i+n,1],1,0 )
             
         }
         
@@ -237,12 +232,7 @@ server <- function(input, output) {
             geom_line(aes(col="Predicciones"))+geom_point()+
             geom_line(aes(y=df_fut[,input$target]))+geom_point(aes(y=df_fut[,input$target]))
         
-        
-        
     })
-    
-    
-    
     
 }
 
